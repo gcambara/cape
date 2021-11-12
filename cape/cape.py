@@ -13,9 +13,10 @@ class CAPE1d(nn.Module):
         self.max_global_scaling = max_global_scaling
         self.normalize = normalize
         self.pos_scale = pos_scale
+        self.freq_scale = freq_scale
         self.batch_first = batch_first
 
-        freq = freq_scale * torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
+        freq = self.freq_scale * torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
         self.register_buffer('freq', freq)
 
     def forward(self, x: Tensor) -> Tensor:
