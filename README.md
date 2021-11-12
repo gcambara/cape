@@ -13,7 +13,7 @@ pip install --editable ./
 ```
 
 ## Usage 📖
-Ready to go along with PyTorch's official implementation of Transformers. Default initialization behaves identically as sinusoidal positional embeddings.
+Ready to go along with PyTorch's official implementation of [Transformers](https://pytorch.org/docs/stable/generated/torch.nn.Transformer.html). Default initialization behaves identically as sinusoidal positional embeddings.
 
 ```python
 import torch.nn as nn
