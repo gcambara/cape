@@ -28,7 +28,7 @@ x = transformer(x)
 ```
 
 ## Citation ✍️
-I just did this PyTorch implementation following the [paper's](https://arxiv.org/abs/2106.03143) Python code and the[Flashlight recipe](https://github.com/flashlight/flashlight/blob/cape/cape/plugin/ctc_str3_tl_main_sinpos_trick_dp01_gl60s_nopad.cpp) in C++. All the credit goes to the original authors, please cite them if you use this for your research project:
+I just did this PyTorch implementation following the [paper's](https://arxiv.org/abs/2106.03143) Python code and the [Flashlight recipe](https://github.com/flashlight/flashlight/blob/cape/cape/plugin/ctc_str3_tl_main_sinpos_trick_dp01_gl60s_nopad.cpp) in C++. All the credit goes to the original authors, please cite them if you use this for your research project:
 ``` bibtex
 @article{likhomanenko2021cape,
   title={CAPE: Encoding Relative Positions with Continuous Augmented Positional Embeddings},
