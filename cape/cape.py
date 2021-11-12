@@ -19,7 +19,6 @@ class CAPE1d(nn.Module):
         self.register_buffer('freq', freq)
 
     def forward(self, x: Tensor) -> Tensor:
-
         if self.batch_first:
             batch_size, n_tokens, n_feats = x.shape
         else:
@@ -55,5 +54,6 @@ class CAPE1d(nn.Module):
                 delta_local = 0
             log_lambdas = torch.FloatTensor(batch_size, 1).uniform_(-math.log(self.max_global_scaling), math.log(self.max_global_scaling)).to(positions.device)
 
-            positions = (positions + delta + delta_local) * torch.exp(log_lambdas) 
+            positions = (positions + delta + delta_local) * torch.exp(log_lambdas)
+
         return positions
