@@ -1,14 +1,14 @@
 class CAPE1d(nn.Module):
-    def __init__(self, d_model: int, max_global_shift: float = 0.0, local_shift: bool = False, max_global_scaling: float = 1.0, normalize: bool = True, pos_scale: float = 1.0, freq_scale: float = 1.0):
+    def __init__(self, d_model: int, max_global_shift: float = 0.0, local_shift: bool = False, max_global_scaling: float = 1.0, normalize: bool = False, pos_scale: float = 1.0, freq_scale: float = 1.0):
         super().__init__()
         assert max_global_scaling >= 1, f"Global scaling is {max_global_scaling}, but should be >= 1."
-        
+
         self.max_global_shift = max_global_shift
         self.local_shift = local_shift
         self.max_global_scaling = max_global_scaling
         self.normalize = normalize
         self.pos_scale = pos_scale
-        
+
         freq = freq_scale * torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
         self.register_buffer('freq', freq)
 
@@ -16,7 +16,7 @@ class CAPE1d(nn.Module):
         batch_size, n_feats, n_tokens = x.shape
         positions = (torch.full((batch_size, 1), self.pos_scale) * torch.arange(n_tokens).unsqueeze(0)).to(x)
         positions = self._augment_positions(positions) # B, T
-        
+
         positions = positions.unsqueeze(-1) # B, T, 1
         product = positions * self.freq # (B, T, 1) * (C) = (B, T, C)
         product = product.transpose(1, 2) # (B, C, T)
