@@ -19,10 +19,10 @@ Ready to go along with PyTorch's official implementation of Transformers. Defaul
 import torch.nn as nn
 from cape import CAPE1d
 
-x = torch.randn(10, 32, 512) # seq_len, batch_size, n_feats
 pos_emb = CAPE1d(d_model=512)
 transformer = nn.Transformer(d_model=512)
 
+x = torch.randn(10, 32, 512) # seq_len, batch_size, n_feats
 x += pos_emb(x)
 x = transformer(x)
 ```
