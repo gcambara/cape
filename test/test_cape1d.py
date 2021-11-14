@@ -27,7 +27,7 @@ def test_sinusoidal_positional_encoding():
     x = pos_emb(x)
     assert exp_shape == x.shape, f"Error! Expected shape = {exp_shape} | Received shape = {x.shape}"
 
-def test_cape():
+def test_cape1d():
     pos_emb = CAPE1d(d_model=512, max_global_shift=60, local_shift=True, max_global_scaling=2.1, 
                      normalize=True, pos_scale=0.01, freq_scale=30, batch_first=False)
 
