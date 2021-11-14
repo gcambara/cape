@@ -70,7 +70,7 @@ class CAPE2d(nn.Module):
         self.max_global_scaling = max_global_scaling
         self.pos_scale = pos_scale
         self.batch_first = batch_first
-        
+
         half_channels = self.d_model // 2
         rho = 10 ** (torch.arange(1, half_channels + 1) / half_channels)
         w_x = rho * torch.cos(torch.arange(half_channels))
@@ -84,22 +84,22 @@ class CAPE2d(nn.Module):
             batch_size, patches_x, patches_y, n_feats = patches.shape
         else:
             patches_x, patches_y, batch_size, n_feats = patches.shape
-            
+
         x = torch.zeros([batch_size, patches_x, patches_y])
         y = torch.zeros([batch_size, patches_x, patches_y])
         x += torch.linspace(-1, 1, patches_x)[None, :, None]
         y += torch.linspace(-1, 1, patches_y)[None, None, :]
-        
+
         x, y = self._augment_positions(x, y)
-        
+
         phase = torch.pi * (self.w_x * x[:, :, :, None] + self.w_y * y[:, :, :, None])
         pos_emb = torch.cat([torch.cos(phase), torch.sin(phase)], axis=-1)
-        
+
         if not self.batch_first:
             pos_emb = pos_emb.permute(1, 2, 0, 3)
 
         return pos_emb
-        
+
     def _augment_positions(self, x: Tensor, y: Tensor):
         if self.training:
             batch_size, _, _ = x.shape
@@ -115,5 +115,3 @@ class CAPE2d(nn.Module):
             y *= lambdas
 
         return x, y
-            
-cape = CAPE2d(512, 0.0, False, 1.0, 1.0, False)
