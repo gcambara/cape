@@ -27,6 +27,19 @@ x += pos_emb(x)
 x = transformer(x)
 ```
 
+### CAPE for text 🔤
+```python
+from cape import CAPE1d
+
+pos_emb = CAPE1d(d_model=512, max_global_shift=5.0, max_local_shift=1.0.
+                 max_global_scaling=1.03, normalize=False)
+```
+
+
+### CAPE for audio 🎙️
+
+### CAPE for ViT 🖼️
+
 ## Citation ✍️
 I just did this PyTorch implementation following the [paper's](https://arxiv.org/abs/2106.03143) Python code and the [Flashlight recipe](https://github.com/flashlight/flashlight/blob/cape/cape/plugin/ctc_str3_tl_main_sinpos_trick_dp01_gl60s_nopad.cpp) in C++. All the credit goes to the original authors, please cite them if you use this for your research project:
 ``` bibtex
