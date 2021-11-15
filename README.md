@@ -2,9 +2,6 @@
 PyTorch implementation of [Continuous Augmented Positional Embeddings](https://arxiv.org/abs/2106.03143) (CAPE). Enhance your Transformers with easy-to-use augmentations for your positional embeddings! 
 
 ## Setup 🔧
-Requirements:
-* torch >= 1.10.0
-
 Install from source:
 ```
 git clone https://github.com/gcambara/cape.git

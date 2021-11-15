@@ -44,7 +44,7 @@ class CAPE1d(nn.Module):
         assert self.max_global_scaling >= 1
 
         if self.normalize:
-            positions -= torch.nanmean(positions, axis=1, keepdim=True)
+            positions -= torch.mean(positions[~positions.isnan()].view(positions.shape), axis=1, keepdim=True)  
 
         if self.training:
             batch_size, n_tokens = positions.shape
