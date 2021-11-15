@@ -60,26 +60,23 @@ class CAPE1d(nn.Module):
         return positions
 
 class CAPE2d(nn.Module):
-    def __init__(self, d_model: int, max_global_shift: float = 0.0, local_shift: bool = False, max_global_scaling: float = 1.0, pos_scale: float = 1.0, batch_first: bool = False):
+    def __init__(self, d_model: int, max_global_shift: float = 0.0, max_local_shift: float = 0.0, max_global_scaling: float = 1.0, batch_first: bool = False):
         super().__init__()
         assert d_model % 2 == 0, f"The number of channels should be even, but it is odd! # channels = {d_model}."
 
-        self.d_model = d_model
         self.max_global_shift = max_global_shift
-        self.local_shift = local_shift
+        self.max_local_shift = max_local_shift
         self.max_global_scaling = max_global_scaling
-        self.pos_scale = pos_scale
         self.batch_first = batch_first
 
-        half_channels = self.d_model // 2
+        half_channels = d_model // 2
         rho = 10 ** (torch.arange(1, half_channels + 1) / half_channels)
         w_x = rho * torch.cos(torch.arange(half_channels))
         w_y = rho * torch.sin(torch.arange(half_channels))
         self.register_buffer('w_x', w_x)
         self.register_buffer('w_y', w_y)
-        
+
     def forward(self, patches: Tensor) -> Tensor:
-        ''' Input is PX, PY, B, C, where PX and PY are the number of patches in the X and Y direction'''
         if self.batch_first:
             batch_size, patches_x, patches_y, n_feats = patches.shape
         else:
@@ -106,9 +103,10 @@ class CAPE2d(nn.Module):
             x += torch.FloatTensor(batch_size, 1, 1).uniform_(-self.max_global_shift, self.max_global_shift).to(x.device)
             y += torch.FloatTensor(batch_size, 1, 1).uniform_(-self.max_global_shift, self.max_global_shift).to(y.device)
             
-            if self.local_shift:
-                x += torch.FloatTensor(x.shape).uniform_(-self.pos_scale / 2.0, self.pos_scale / 2.0).to(x.device)
-                y += torch.FloatTensor(y.shape).uniform_(-self.pos_scale / 2.0, self.pos_scale / 2.0).to(y.device)
+            if self.max_local_shift:
+                diff = x[0, -1, 0] - x[0, -2, 0]
+                x += torch.FloatTensor(x.shape).uniform_(-(diff*self.max_local_shift) / 2.0, (diff*self.max_local_shift) / 2.0).to(x.device)
+                y += torch.FloatTensor(y.shape).uniform_(-(diff*self.max_local_shift) / 2.0, (diff*self.max_local_shift) / 2.0).to(y.device)
 
             lambdas = torch.exp(torch.FloatTensor(batch_size, 1, 1).uniform_(-math.log(self.max_global_scaling), math.log(self.max_global_scaling))).to(x.device)
             x *= lambdas
