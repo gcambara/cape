@@ -4,12 +4,12 @@ import torch.nn as nn
 from torch import Tensor
 
 class CAPE1d(nn.Module):
-    def __init__(self, d_model: int, max_global_shift: float = 0.0, local_shift: bool = False, max_global_scaling: float = 1.0, normalize: bool = False, pos_scale: float = 1.0, freq_scale: float = 1.0, batch_first: bool = False):
+    def __init__(self, d_model: int, max_global_shift: float = 0.0, max_local_shift: float = 0.0, max_global_scaling: float = 1.0, normalize: bool = False, pos_scale: float = 1.0, freq_scale: float = 1.0, batch_first: bool = False):
         super().__init__()
         assert max_global_scaling >= 1, f"Global scaling is {max_global_scaling}, but should be >= 1."
 
         self.max_global_shift = max_global_shift
-        self.local_shift = local_shift
+        self.max_local_shift = max_local_shift
         self.max_global_scaling = max_global_scaling
         self.normalize = normalize
         self.pos_scale = pos_scale
@@ -49,8 +49,8 @@ class CAPE1d(nn.Module):
         if self.training:
             batch_size, n_tokens = positions.shape
             delta = torch.FloatTensor(batch_size, 1).uniform_(-self.max_global_shift, self.max_global_shift).to(positions.device)
-            if self.local_shift:
-                delta_local = torch.FloatTensor(batch_size, n_tokens).uniform_(-self.pos_scale / 2.0, self.pos_scale / 2.0).to(positions.device)
+            if self.max_local_shift:
+                delta_local = torch.FloatTensor(batch_size, n_tokens).uniform_(-(self.pos_scale*self.max_local_shift) / 2.0, (self.pos_scale*self.max_local_shift) / 2.0).to(positions.device)
             else:
                 delta_local = 0
             log_lambdas = torch.FloatTensor(batch_size, 1).uniform_(-math.log(self.max_global_scaling), math.log(self.max_global_scaling)).to(positions.device)
