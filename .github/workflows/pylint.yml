@@ -20,4 +20,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint `find . -type f -name "*.py" | tr '\n' ' '`
+        pylint --rcfile=.pylintrc `find . -type f -name "*.py" | tr '\n' ' '`
