@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 from cape import CAPE1d
 
 def test_sinusoidal_positional_encoding():
