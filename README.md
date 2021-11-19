@@ -1,8 +1,8 @@
-# CAPE 🌴
+# CAPE 🌴 ![pylint](https://img.shields.io/github/workflow/status/gcambara/cape/Pylint?label=pylint) ![pytest](https://img.shields.io/github/workflow/status/gcambara/cape/Pytest?label=pytest)
 PyTorch implementation of [Continuous Augmented Positional Embeddings](https://arxiv.org/abs/2106.03143) (CAPE), by Likhomanenko et al. Enhance your Transformer positional embeddings with easy-to-use augmentations! 
 
-![pylint](https://img.shields.io/github/workflow/status/gcambara/cape/Pylint?label=pylint)
-![pytest](https://img.shields.io/github/workflow/status/gcambara/cape/Pytest?label=pytest)
+
+
 
 ## Setup 🔧
 Install from source:
