@@ -14,7 +14,7 @@ def test_sinusoidal_positional_encoding():
     assert pos_emb.max_global_scaling == 1.0, f"""Error! Expected max global scaling = {1.0}
                                                   | Received max global scaling =
                                                   {pos_emb.max_global_scaling}"""
-    assert pos_emb.normalize == False, f"""Error! Expected normalize = {False}
+    assert pos_emb.normalize is False, f"""Error! Expected normalize = {False}
                                            | Received normalize =
                                            {pos_emb.normalize}"""
     assert pos_emb.pos_scale == 1.0, f"""Error! Expected position scale = {1.0}
@@ -23,7 +23,7 @@ def test_sinusoidal_positional_encoding():
     assert pos_emb.freq_scale == 1.0, f"""Error! Expected frequency scale = {1.0}
                                           | Received frequency scale =
                                           {pos_emb.freq_scale}"""
-    assert pos_emb.batch_first == False, f"""Error! Expected batch first = {False}
+    assert pos_emb.batch_first is False, f"""Error! Expected batch first = {False}
                                              | Received batch first =
                                              {pos_emb.batch_first}"""
 
@@ -69,7 +69,7 @@ def test_augment_positions():
                      freq_scale=freq_scale, batch_first=False)
 
     positions = (torch.full((batch_size, 1), pos_scale) * torch.arange(n_tokens).unsqueeze(0))
-    positions = pos_emb._augment_positions(positions)
+    positions = pos_emb.augment_positions(positions)
 
     assert positions.mean() == 0.0, f"""Error! After normalization expected mean = {0.0}
                                         | Received mean = {positions.mean()}"""

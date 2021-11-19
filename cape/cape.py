@@ -30,7 +30,7 @@ class CAPE1d(nn.Module):
 
         positions = (torch.full((batch_size, 1), self.pos_scale)
                      * torch.arange(n_tokens).unsqueeze(0)).to(x)
-        positions = self._augment_positions(positions) # B, T
+        positions = self.augment_positions(positions) # B, T
 
         positions = positions.unsqueeze(-1) # B, T, 1
         product = positions * self.freq # (B, T, 1) * (C) = (B, T, C)
@@ -44,7 +44,7 @@ class CAPE1d(nn.Module):
 
         return pos_emb
 
-    def _augment_positions(self, positions: Tensor):
+    def augment_positions(self, positions: Tensor):
         assert self.max_global_scaling >= 1
 
         if self.normalize:
@@ -105,7 +105,7 @@ class CAPE2d(nn.Module):
         x += torch.linspace(-1, 1, patches_x)[None, :, None]
         y += torch.linspace(-1, 1, patches_y)[None, None, :]
 
-        x, y = self._augment_positions(x, y)
+        x, y = self.augment_positions(x, y)
 
         phase = torch.pi * (self.w_x * x[:, :, :, None]
                             + self.w_y * y[:, :, :, None])
@@ -116,7 +116,7 @@ class CAPE2d(nn.Module):
 
         return pos_emb
 
-    def _augment_positions(self, x: Tensor, y: Tensor):
+    def augment_positions(self, x: Tensor, y: Tensor):
         if self.training:
             batch_size, _, _ = x.shape
             x += torch.FloatTensor(batch_size, 1, 1).uniform_(-self.max_global_shift,

@@ -13,7 +13,7 @@ pip install --editable ./
 Ready to go along with PyTorch's official implementation of [Transformers](https://pytorch.org/docs/stable/generated/torch.nn.Transformer.html). Default initialization behaves identically as sinusoidal positional embeddings.
 
 ```python
-import torch.nn as nn
+from torch import nn
 from cape import CAPE1d
 
 pos_emb = CAPE1d(d_model=512)
