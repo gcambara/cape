@@ -96,9 +96,9 @@ class CAPE2d(nn.Module):
 
     def forward(self, patches: Tensor) -> Tensor:
         if self.batch_first:
-            batch_size, patches_x, patches_y, n_feats = patches.shape
+            batch_size, patches_x, patches_y, _ = patches.shape
         else:
-            patches_x, patches_y, batch_size, n_feats = patches.shape
+            patches_x, patches_y, batch_size, _ = patches.shape
 
         x = torch.zeros([batch_size, patches_x, patches_y])
         y = torch.zeros([batch_size, patches_x, patches_y])
