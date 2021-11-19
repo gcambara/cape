@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 from cape import CAPE2d
 
 def test_cape2d():
