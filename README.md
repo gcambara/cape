@@ -1,5 +1,5 @@
 # CAPE 🌴
-PyTorch implementation of [Continuous Augmented Positional Embeddings](https://arxiv.org/abs/2106.03143) (CAPE). Enhance your Transformers with easy-to-use augmentations for your positional embeddings! 
+PyTorch implementation of [Continuous Augmented Positional Embeddings](https://arxiv.org/abs/2106.03143) (CAPE), by Likhomanenko et al. Enhance your Transformer positional embeddings with easy-to-use augmentations! 
 
 ## Setup 🔧
 Install from source:
