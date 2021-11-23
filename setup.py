@@ -9,6 +9,7 @@ setup(
     author_email='guillermocambara@gmail.com',
     url='https://github.com/gcambara/cape',
     install_requires=[
+        'einops>=0.3.2',
         'torch>=1.10.0',
     ],
     keywords=['continuous_augmented_positional_embeddings', 'cape', 'positional_embeddings',

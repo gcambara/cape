@@ -1,4 +1,5 @@
 import math
+from einops import rearrange, repeat
 import torch
 from torch import nn
 from torch import Tensor
@@ -24,23 +25,23 @@ class CAPE1d(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         if self.batch_first:
-            batch_size, n_tokens, n_feats = x.shape
+            batch_size, n_tokens, n_feats = x.shape # b, t, c
         else:
-            n_tokens, batch_size, n_feats = x.shape
+            n_tokens, batch_size, n_feats = x.shape # t, b, c
 
-        positions = (torch.full((batch_size, 1), self.pos_scale)
-                     * torch.arange(n_tokens).unsqueeze(0)).to(x)
-        positions = self.augment_positions(positions) # B, T
+        positions = repeat(self.pos_scale*torch.arange(n_tokens),
+                           't -> new_axis t', new_axis=batch_size).to(x)
+        positions = self.augment_positions(positions)
 
-        positions = positions.unsqueeze(-1) # B, T, 1
-        product = positions * self.freq # (B, T, 1) * (C) = (B, T, C)
+        positions = rearrange(positions, 'b t -> b t 1')
+        product = positions * self.freq
 
         pos_emb = torch.zeros(batch_size, n_tokens, n_feats, device=x.device)
         pos_emb[:, :, 0::2] = torch.sin(product)
         pos_emb[:, :, 1::2] = torch.cos(product)
 
         if not self.batch_first:
-            pos_emb = pos_emb.transpose(0, 1)
+            pos_emb = rearrange(pos_emb, 'b t c -> t b c')
 
         return pos_emb
 
@@ -48,7 +49,10 @@ class CAPE1d(nn.Module):
         assert self.max_global_scaling >= 1
 
         if self.normalize:
-            positions -= torch.mean(positions[~positions.isnan()].view(positions.shape),
+            positions -= torch.mean(rearrange(positions[~positions.isnan()],
+                                              '(b t) -> b t',
+                                              b=positions.size(0),
+                                              t=positions.size(1)),
                                     axis=1, keepdim=True)
 
         if self.training:
@@ -96,9 +100,9 @@ class CAPE2d(nn.Module):
 
     def forward(self, patches: Tensor) -> Tensor:
         if self.batch_first:
-            batch_size, patches_x, patches_y, _ = patches.shape
+            batch_size, patches_x, patches_y, _ = patches.shape # b, x, y, c
         else:
-            patches_x, patches_y, batch_size, _ = patches.shape
+            patches_x, patches_y, batch_size, _ = patches.shape # x, y, b, c
 
         x = torch.zeros([batch_size, patches_x, patches_y])
         y = torch.zeros([batch_size, patches_x, patches_y])
@@ -112,7 +116,7 @@ class CAPE2d(nn.Module):
         pos_emb = torch.cat([torch.cos(phase), torch.sin(phase)], axis=-1)
 
         if not self.batch_first:
-            pos_emb = pos_emb.permute(1, 2, 0, 3)
+            pos_emb = rearrange(pos_emb, 'b x y c -> x y b c')
 
         return pos_emb
 
