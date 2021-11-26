@@ -66,3 +66,6 @@ year={2021},
 url={https://openreview.net/forum?id=n-FqqWXnWW}
 }
 ```
+
+## Acknowledgments 🙏
+Many thanks to Tatiana Likhomanenko for code reviewing and clarifying doubts about the paper and the implementation. :)
