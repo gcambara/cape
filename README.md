@@ -1,9 +1,6 @@
 # CAPE 🌴 ![pylint](https://img.shields.io/github/workflow/status/gcambara/cape/Pylint?label=pylint) ![pytest](https://img.shields.io/github/workflow/status/gcambara/cape/Pytest?label=pytest)
 PyTorch implementation of [Continuous Augmented Positional Embeddings](https://arxiv.org/abs/2106.03143) (CAPE), by Likhomanenko et al. Enhance your Transformer positional embeddings with easy-to-use augmentations! 
 
-
-
-
 ## Setup 🔧
 Install from source:
 ```
@@ -42,12 +39,12 @@ pos_emb = CAPE1d(d_model=512, max_global_shift=5.0,
 # Max global shift is 60 s.
 # Max local shift is set to 1.0 to maintain positional order.
 # Max global scaling is 1.1, according to WSJ recipe.
-# Pos scale is 0.01 since feats are strided between each other in 0.01 s.
+# Pos scale is 0.01 since feats are strided between each other in 0.03 s.
 # Freq scale is 30 to ensure that 30 ms queries are possible with long audios
 from cape import CAPE1d
 pos_emb = CAPE1d(d_model=512, max_global_shift=60.0, 
                  max_local_shift=1.0, max_global_scaling=1.1, 
-                 normalize=True, pos_scale=0.01,
+                 normalize=True, pos_scale=0.03,
                  freq_scale=30.0)
 ```
 
