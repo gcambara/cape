@@ -20,25 +20,28 @@ class CAPE1d(nn.Module):
         self.freq_scale = freq_scale
         self.batch_first = batch_first
 
-        freq = freq_scale * torch.exp(torch.arange(0, d_model, 2) * (-math.log(1e4) / d_model))
+        freq = freq_scale * torch.exp(-2.0 * torch.floor(torch.arange(d_model) / 2)
+                                      * (math.log(1e4) / d_model))
         self.register_buffer('freq', freq)
+
+        _sin2cos_phase_shift = torch.pi / 2.0
+        cos_shifts = _sin2cos_phase_shift * (torch.arange(d_model) % 2)
+        self.register_buffer('cos_shifts', cos_shifts)
 
     def forward(self, x: Tensor) -> Tensor:
         if self.batch_first:
-            batch_size, n_tokens, n_feats = x.shape # b, t, c
+            batch_size, n_tokens, _ = x.shape # b, t, c
         else:
-            n_tokens, batch_size, n_feats = x.shape # t, b, c
+            n_tokens, batch_size, _ = x.shape # t, b, c
 
         positions = repeat(self.pos_scale*torch.arange(n_tokens),
                            't -> new_axis t', new_axis=batch_size).to(x)
         positions = self.augment_positions(positions)
 
         positions = rearrange(positions, 'b t -> b t 1')
-        product = positions * self.freq
+        product = positions * self.freq.to(x)
 
-        pos_emb = torch.zeros(batch_size, n_tokens, n_feats, device=x.device)
-        pos_emb[:, :, 0::2] = torch.sin(product)
-        pos_emb[:, :, 1::2] = torch.cos(product)
+        pos_emb = torch.sin(product + self.cos_shifts.to(x))
 
         if not self.batch_first:
             pos_emb = rearrange(pos_emb, 'b t c -> t b c')
