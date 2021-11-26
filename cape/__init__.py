@@ -1,1 +1,1 @@
-from cape.cape import CAPE1d, CAPE2d
+from .cape import CAPE1d, CAPE2d
