@@ -28,8 +28,10 @@ class CAPE1d(nn.Module):
         cos_shifts = _sin2cos_phase_shift * (torch.arange(d_model) % 2)
         self.register_buffer('cos_shifts', cos_shifts)
 
+        self.register_buffer('content_scale', Tensor([math.sqrt(d_model)]))
+
     def forward(self, x: Tensor) -> Tensor:
-        return x + self.compute_pos_emb(x)
+        return (x * self.content_scale) + self.compute_pos_emb(x)
 
     def compute_pos_emb(self, x: Tensor) -> Tensor:
         if self.batch_first:
@@ -85,6 +87,9 @@ class CAPE1d(nn.Module):
 
         return positions
 
+    def set_content_scale(self, content_scale: float):
+        self.content_scale = Tensor([content_scale])
+
 class CAPE2d(nn.Module):
     def __init__(self, d_model: int, max_global_shift: float = 0.0, max_local_shift: float = 0.0,
                  max_global_scaling: float = 1.0, batch_first: bool = False):
@@ -104,8 +109,10 @@ class CAPE2d(nn.Module):
         self.register_buffer('w_x', w_x)
         self.register_buffer('w_y', w_y)
 
+        self.register_buffer('content_scale', Tensor([math.sqrt(d_model)]))
+
     def forward(self, patches: Tensor) -> Tensor:
-        return patches + self.compute_pos_emb(patches)
+        return (patches * self.content_scale) + self.compute_pos_emb(patches)
 
     def compute_pos_emb(self, patches: Tensor) -> Tensor:
         if self.batch_first:
@@ -152,3 +159,6 @@ class CAPE2d(nn.Module):
             y *= lambdas
 
         return x, y
+
+    def set_content_scale(self, content_scale: float):
+        self.content_scale = Tensor([content_scale])
