@@ -59,8 +59,6 @@ class CAPE1d(nn.Module):
         return pos_emb
 
     def augment_positions(self, positions: Tensor):
-        assert self.max_global_scaling >= 1
-
         if self.normalize:
             positions -= torch.mean(rearrange(positions[~positions.isnan()],
                                               '(b t) -> b t',
@@ -70,9 +68,13 @@ class CAPE1d(nn.Module):
 
         if self.training:
             batch_size, n_tokens = positions.shape
-            delta = torch.FloatTensor(batch_size, 1).uniform_(-self.max_global_shift,
-                                                              self.max_global_shift)
-            delta = delta.to(positions.device)
+
+            if self.max_global_shift:
+                delta = torch.FloatTensor(batch_size, 1).uniform_(-self.max_global_shift,
+                                                                  self.max_global_shift)
+                delta = delta.to(positions.device)
+            else:
+                delta = 0
 
             if self.max_local_shift:
                 epsilon = self.pos_scale * self.max_local_shift
@@ -83,10 +85,13 @@ class CAPE1d(nn.Module):
             else:
                 delta_local = 0
 
-            log_lambdas = torch.FloatTensor(batch_size, 1)
-            log_lambdas = log_lambdas.uniform_(-math.log(self.max_global_scaling),
-                                               math.log(self.max_global_scaling))
-            log_lambdas = log_lambdas.to(positions.device)
+            if self.max_global_scaling > 1.0:
+                log_lambdas = torch.FloatTensor(batch_size, 1)
+                log_lambdas = log_lambdas.uniform_(-math.log(self.max_global_scaling),
+                                                   math.log(self.max_global_scaling))
+                log_lambdas = log_lambdas.to(positions.device)
+            else:
+                log_lambdas = torch.zeros(1).to(positions.device)
 
             positions = (positions + delta + delta_local) * torch.exp(log_lambdas)
 
@@ -151,10 +156,14 @@ class CAPE2d(nn.Module):
     def augment_positions(self, x: Tensor, y: Tensor):
         if self.training:
             batch_size, _, _ = x.shape
-            x += torch.FloatTensor(batch_size, 1, 1).uniform_(-self.max_global_shift,
-                                                              self.max_global_shift).to(x.device)
-            y += torch.FloatTensor(batch_size, 1, 1).uniform_(-self.max_global_shift,
-                                                              self.max_global_shift).to(y.device)
+
+            if self.max_global_shift:
+                x += (torch.FloatTensor(batch_size, 1, 1).uniform_(-self.max_global_shift,
+                                                                   self.max_global_shift)
+                     ).to(x.device)
+                y += (torch.FloatTensor(batch_size, 1, 1).uniform_(-self.max_global_shift,
+                                                                   self.max_global_shift)
+                     ).to(y.device)
 
             if self.max_local_shift:
                 diff = x[0, -1, 0] - x[0, -2, 0]
@@ -164,11 +173,13 @@ class CAPE2d(nn.Module):
                 y += torch.FloatTensor(y.shape).uniform_(-epsilon,
                                                          epsilon).to(y.device)
 
-            log_l = math.log(self.max_global_scaling)
-            lambdas = torch.exp(torch.FloatTensor(batch_size, 1, 1).uniform_(-log_l,
-                                                                             log_l)).to(x.device)
-            x *= lambdas
-            y *= lambdas
+            if self.max_global_scaling > 1.0:
+                log_l = math.log(self.max_global_scaling)
+                lambdas = (torch.exp(torch.FloatTensor(batch_size, 1, 1).uniform_(-log_l,
+                                                                                  log_l))
+                          ).to(x.device)
+                x *= lambdas
+                y *= lambdas
 
         return x, y
 
