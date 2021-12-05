@@ -37,7 +37,7 @@ Let's see a few examples of CAPE initialization for different modalities, inspir
 ```python
 from cape import CAPE1d
 pos_emb = CAPE1d(d_model=512, max_global_shift=5.0, 
-                 max_local_shift=1.0, max_global_scaling=1.03, 
+                 max_local_shift=0.5, max_global_scaling=1.03, 
                  normalize=False)
 ```
 
@@ -50,7 +50,7 @@ pos_emb = CAPE1d(d_model=512, max_global_shift=5.0,
 # Freq scale is 30 to ensure that 30 ms queries are possible with long audios
 from cape import CAPE1d
 pos_emb = CAPE1d(d_model=512, max_global_shift=60.0, 
-                 max_local_shift=1.0, max_global_scaling=1.1, 
+                 max_local_shift=0.5, max_global_scaling=1.1, 
                  normalize=True, pos_scale=0.03,
                  freq_scale=30.0)
 ```
@@ -59,7 +59,7 @@ pos_emb = CAPE1d(d_model=512, max_global_shift=60.0,
 ```python
 from cape import CAPE2d
 pos_emb = CAPE2d(d_model=512, max_global_shift=0.5, 
-                 max_local_shift=1.0, max_global_scaling=1.4)
+                 max_local_shift=0.5, max_global_scaling=1.4)
 ```
 
 ## Citation ✍️

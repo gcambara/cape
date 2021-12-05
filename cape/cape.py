@@ -72,8 +72,8 @@ class CAPE1d(nn.Module):
             if self.max_local_shift:
                 epsilon = self.pos_scale * self.max_local_shift
                 delta_local = torch.FloatTensor(batch_size, n_tokens)
-                delta_local = delta_local.uniform_(-epsilon / 2.0,
-                                                   epsilon / 2.0)
+                delta_local = delta_local.uniform_(-epsilon,
+                                                   epsilon)
                 delta_local = delta_local.to(positions.device)
             else:
                 delta_local = 0
@@ -147,10 +147,10 @@ class CAPE2d(nn.Module):
             if self.max_local_shift:
                 diff = x[0, -1, 0] - x[0, -2, 0]
                 epsilon = diff*self.max_local_shift
-                x += torch.FloatTensor(x.shape).uniform_(-epsilon / 2.0,
-                                                         epsilon / 2.0).to(x.device)
-                y += torch.FloatTensor(y.shape).uniform_(-epsilon / 2.0,
-                                                         epsilon / 2.0).to(y.device)
+                x += torch.FloatTensor(x.shape).uniform_(-epsilon,
+                                                         epsilon).to(x.device)
+                y += torch.FloatTensor(y.shape).uniform_(-epsilon,
+                                                         epsilon).to(y.device)
 
             log_l = math.log(self.max_global_scaling)
             lambdas = torch.exp(torch.FloatTensor(batch_size, 1, 1).uniform_(-log_l,
