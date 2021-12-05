@@ -166,12 +166,14 @@ class CAPE2d(nn.Module):
                      ).to(y.device)
 
             if self.max_local_shift:
-                diff = x[0, -1, 0] - x[0, -2, 0]
-                epsilon = diff*self.max_local_shift
-                x += torch.FloatTensor(x.shape).uniform_(-epsilon,
-                                                         epsilon).to(x.device)
-                y += torch.FloatTensor(y.shape).uniform_(-epsilon,
-                                                         epsilon).to(y.device)
+                diff_x = x[0, -1, 0] - x[0, -2, 0]
+                diff_y = y[0, 0, -1] - y[0, 0, -2]
+                epsilon_x = diff_x*self.max_local_shift
+                epsilon_y = diff_y*self.max_local_shift
+                x += torch.FloatTensor(x.shape).uniform_(-epsilon_x,
+                                                         epsilon_x).to(x.device)
+                y += torch.FloatTensor(y.shape).uniform_(-epsilon_y,
+                                                         epsilon_y).to(y.device)
 
             if self.max_global_scaling > 1.0:
                 log_l = math.log(self.max_global_scaling)
