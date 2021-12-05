@@ -73,3 +73,39 @@ def test_augment_positions():
 
     assert positions.mean() == 0.0, f"""Error! After normalization expected mean = {0.0}
                                         | Received mean = {positions.mean()}"""
+
+    print("Checking that positions order is not altered after local shifting...")
+    def check_position_order(max_local_shift, batch_size=128, n_tokens=200, expect_disorder=False):
+        if expect_disorder:
+            spotted_disorder = False
+        pos_scale, freq_scale = 1.0, 1.0
+        pos_emb = CAPE1d(d_model=512, max_global_shift=0.0, max_local_shift=max_local_shift,
+                         max_global_scaling=1.0, normalize=True, pos_scale=pos_scale,
+                         freq_scale=freq_scale, batch_first=False)
+
+        positions = (torch.full((batch_size, 1), pos_scale) * torch.arange(n_tokens).unsqueeze(0))
+        positions = pos_emb.augment_positions(positions)
+        for b in range(batch_size):
+            pos = positions[b, :]
+            for t in range(n_tokens - 1):
+                if not expect_disorder:
+                    assert pos[t] < pos[t + 1], f"""Error! Position order has been altered after
+                                                    local shifting with
+                                                    max value {max_local_shift}.
+                                                    Pos embedding = {pos}.
+                                                    Index t = {t}
+                                                    Index t + 1 = {t + 1}."""
+                else:
+                    if pos[t] >= pos[t + 1]:
+                        spotted_disorder = True
+
+        if expect_disorder:
+            assert spotted_disorder, f"""Error! Expected position disorder with
+                                         max local shift = {max_local_shift}.
+                                         However, haven't spotted any."""
+
+    check_position_order(max_local_shift=0.00)
+    check_position_order(max_local_shift=0.25)
+    check_position_order(max_local_shift=0.50)
+    check_position_order(max_local_shift=0.55, batch_size=1024, expect_disorder=True)
+    check_position_order(max_local_shift=1.00, batch_size=1024, expect_disorder=True)
