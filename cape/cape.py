@@ -29,6 +29,9 @@ class CAPE1d(nn.Module):
         self.register_buffer('cos_shifts', cos_shifts)
 
     def forward(self, x: Tensor) -> Tensor:
+        return x + self.compute_pos_emb(x)
+
+    def compute_pos_emb(self, x: Tensor) -> Tensor:
         if self.batch_first:
             batch_size, n_tokens, _ = x.shape # b, t, c
         else:
@@ -102,6 +105,9 @@ class CAPE2d(nn.Module):
         self.register_buffer('w_y', w_y)
 
     def forward(self, patches: Tensor) -> Tensor:
+        return patches + self.compute_pos_emb(patches)
+
+    def compute_pos_emb(self, patches: Tensor) -> Tensor:
         if self.batch_first:
             batch_size, patches_x, patches_y, _ = patches.shape # b, x, y, c
         else:

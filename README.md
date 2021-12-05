@@ -20,7 +20,14 @@ pos_emb = CAPE1d(d_model=512)
 transformer = nn.Transformer(d_model=512)
 
 x = torch.randn(10, 32, 512) # seq_len, batch_size, n_feats
-x += pos_emb(x)
+x = pos_emb(x) # forward sums the positional embedding by default
+x = transformer(x)
+
+# Alternatively, you can get positional embeddings separately
+x = torch.randn(10, 32, 512)
+scale = 512**0.5
+pos_emb = pos_emb.compute_pos_emb(x)
+x = (scale * x) + pos_emb
 x = transformer(x)
 ```
 
