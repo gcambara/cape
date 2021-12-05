@@ -120,7 +120,7 @@ class CAPE2d(nn.Module):
         self.batch_first = batch_first
 
         half_channels = d_model // 2
-        rho = 10 ** (torch.arange(1, half_channels + 1) / half_channels)
+        rho = 10 ** torch.linspace(0, 1, half_channels) 
         w_x = rho * torch.cos(torch.arange(half_channels))
         w_y = rho * torch.sin(torch.arange(half_channels))
         self.register_buffer('w_x', w_x)
