@@ -9,6 +9,11 @@ class CAPE1d(nn.Module):
                  max_global_scaling: float = 1.0, normalize: bool = False, pos_scale: float = 1.0,
                  freq_scale: float = 1.0, batch_first: bool = False):
         super().__init__()
+
+        assert max_global_shift >= 0, f"""Max global shift is {max_global_shift},
+        but should be >= 0."""
+        assert max_local_shift >= 0, f"""Max local shift is {max_local_shift},
+        but should be >= 0."""
         assert max_global_scaling >= 1, f"""Global scaling is {max_global_scaling},
         but should be >= 1."""
 
@@ -94,6 +99,13 @@ class CAPE2d(nn.Module):
     def __init__(self, d_model: int, max_global_shift: float = 0.0, max_local_shift: float = 0.0,
                  max_global_scaling: float = 1.0, batch_first: bool = False):
         super().__init__()
+
+        assert max_global_shift >= 0, f"""Max global shift is {max_global_shift},
+        but should be >= 0."""
+        assert max_local_shift >= 0, f"""Max local shift is {max_local_shift},
+        but should be >= 0."""
+        assert max_global_scaling >= 1, f"""Global scaling is {max_global_scaling},
+        but should be >= 1."""
         assert d_model % 2 == 0, f"""The number of channels should be even,
                                      but it is odd! # channels = {d_model}."""
 
