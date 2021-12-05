@@ -97,7 +97,7 @@ def test_augment_positions():
                                                     Index t + 1 = {t + 1}."""
                 else:
                     if pos[t] >= pos[t + 1]:
-                        spotted_disorder = True
+                        return
 
         if expect_disorder:
             assert spotted_disorder, f"""Error! Expected position disorder with
