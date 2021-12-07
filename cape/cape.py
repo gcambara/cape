@@ -1,4 +1,5 @@
 import math
+from typing import Optional, Union
 from einops import rearrange, repeat
 import torch
 from torch import nn
@@ -6,8 +7,8 @@ from torch import Tensor
 
 class CAPE1d(nn.Module):
     def __init__(self, d_model: int, max_global_shift: float = 0.0, max_local_shift: float = 0.0,
-                 max_global_scaling: float = 1.0, normalize: bool = False, pos_scale: float = 1.0,
-                 freq_scale: float = 1.0, batch_first: bool = False):
+                 max_global_scaling: float = 1.0, normalize: bool = False, freq_scale: float = 1.0,
+                 batch_first: bool = False):
         super().__init__()
 
         assert max_global_shift >= 0, f"""Max global shift is {max_global_shift},
@@ -21,7 +22,6 @@ class CAPE1d(nn.Module):
         self.max_local_shift = max_local_shift
         self.max_global_scaling = max_global_scaling
         self.normalize = normalize
-        self.pos_scale = pos_scale
         self.freq_scale = freq_scale
         self.batch_first = batch_first
 
@@ -35,18 +35,35 @@ class CAPE1d(nn.Module):
 
         self.register_buffer('content_scale', Tensor([math.sqrt(d_model)]))
 
-    def forward(self, x: Tensor) -> Tensor:
-        return (x * self.content_scale) + self.compute_pos_emb(x)
+    def forward(self, x: Tensor, x_lengths: Optional[Tensor] = None,
+                positions_delta: Optional[Union[int, Tensor]] = None) -> Tensor:
+        return (x * self.content_scale) + self.compute_pos_emb(x, x_lengths, positions_delta)
 
-    def compute_pos_emb(self, x: Tensor) -> Tensor:
+    def compute_pos_emb(self, x: Tensor, x_lengths: Optional[Tensor] = None,
+                        positions_delta: Optional[Union[int, Tensor]] = None) -> Tensor:
         if self.batch_first:
             batch_size, n_tokens, _ = x.shape # b, t, c
         else:
             n_tokens, batch_size, _ = x.shape # t, b, c
 
-        positions = repeat(self.pos_scale*torch.arange(n_tokens),
+        positions = repeat(torch.arange(n_tokens),
                            't -> new_axis t', new_axis=batch_size).to(x)
-        positions = self.augment_positions(positions)
+
+        if positions_delta is None:
+            positions_delta = 1
+        else:
+            if torch.is_tensor(positions_delta) and len(positions_delta.shape) == 1:
+                positions_delta = rearrange(positions_delta, 'b -> b 1')
+            positions *= positions_delta
+
+        if x_lengths is not None:
+            padding_mask = positions > x_lengths[:, None]
+            positions[padding_mask] = float('nan')
+
+        if self.normalize:
+            positions -= torch.nanmean(positions, axis=1, keepdim=True)
+
+        positions = self.augment_positions(positions, positions_delta)
 
         positions = rearrange(positions, 'b t -> b t 1')
         product = positions * self.freq.to(x)
@@ -56,16 +73,12 @@ class CAPE1d(nn.Module):
         if not self.batch_first:
             pos_emb = rearrange(pos_emb, 'b t c -> t b c')
 
+        pos_emb = torch.nan_to_num(pos_emb, nan=0)
+
         return pos_emb
 
-    def augment_positions(self, positions: Tensor):
-        if self.normalize:
-            positions -= torch.mean(rearrange(positions[~positions.isnan()],
-                                              '(b t) -> b t',
-                                              b=positions.size(0),
-                                              t=positions.size(1)),
-                                    axis=1, keepdim=True)
-
+    def augment_positions(self, positions: Tensor,
+                          positions_delta: Optional[Union[int, Tensor]] = None):
         if self.training:
             batch_size, n_tokens = positions.shape
 
@@ -77,11 +90,15 @@ class CAPE1d(nn.Module):
                 delta = 0
 
             if self.max_local_shift:
-                epsilon = self.pos_scale * self.max_local_shift
+                epsilon = self.max_local_shift
                 delta_local = torch.FloatTensor(batch_size, n_tokens)
                 delta_local = delta_local.uniform_(-epsilon,
                                                    epsilon)
                 delta_local = delta_local.to(positions.device)
+                if positions_delta is not None:
+                    if torch.is_tensor(positions_delta) and len(positions_delta.shape) == 1:
+                        positions_delta = rearrange(positions_delta, 'b -> b 1')
+                    delta_local *= positions_delta
             else:
                 delta_local = 0
 
@@ -120,7 +137,7 @@ class CAPE2d(nn.Module):
         self.batch_first = batch_first
 
         half_channels = d_model // 2
-        rho = 10 ** torch.linspace(0, 1, half_channels) 
+        rho = 10 ** torch.linspace(0, 1, half_channels)
         w_x = rho * torch.cos(torch.arange(half_channels))
         w_y = rho * torch.sin(torch.arange(half_channels))
         self.register_buffer('w_x', w_x)

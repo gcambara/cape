@@ -17,9 +17,6 @@ def test_sinusoidal_positional_encoding():
     assert pos_emb.normalize is False, f"""Error! Expected normalize = {False}
                                            | Received normalize =
                                            {pos_emb.normalize}"""
-    assert pos_emb.pos_scale == 1.0, f"""Error! Expected position scale = {1.0}
-                                         | Received position scale =
-                                         {pos_emb.pos_scale}"""
     assert pos_emb.freq_scale == 1.0, f"""Error! Expected frequency scale = {1.0}
                                           | Received frequency scale =
                                           {pos_emb.freq_scale}"""
@@ -44,7 +41,7 @@ def test_sinusoidal_positional_encoding():
 
 def test_cape1d():
     pos_emb = CAPE1d(d_model=512, max_global_shift=60, max_local_shift=1.0, max_global_scaling=2.1,
-                     normalize=True, pos_scale=0.01, freq_scale=30, batch_first=False)
+                     normalize=True, freq_scale=30, batch_first=False)
 
     print("Checking correct dimensionality input/output for batch_size = False...")
     exp_shape = (10, 32, 512)
@@ -54,7 +51,7 @@ def test_cape1d():
 
     print("Checking correct dimensionality input/output for batch_size = True...")
     pos_emb = CAPE1d(d_model=512, max_global_shift=60, max_local_shift=1.0, max_global_scaling=2.1,
-                     normalize=True, pos_scale=0.01, freq_scale=30, batch_first=True)
+                     normalize=True, freq_scale=30, batch_first=True)
     exp_shape = (32, 10, 512)
     x = torch.randn(exp_shape)
     x = pos_emb(x)
@@ -63,13 +60,15 @@ def test_cape1d():
 def test_augment_positions():
     print("Checking correct normalization of positions...")
     batch_size, n_tokens = 128, 200
-    pos_scale, freq_scale = 1.0, 1.0
+    positions_delta, freq_scale = 1.0, 1.0
     pos_emb = CAPE1d(d_model=512, max_global_shift=0.0, max_local_shift=0.0,
-                     max_global_scaling=1.0, normalize=True, pos_scale=pos_scale,
+                     max_global_scaling=1.0, normalize=True,
                      freq_scale=freq_scale, batch_first=False)
 
-    positions = (torch.full((batch_size, 1), pos_scale) * torch.arange(n_tokens).unsqueeze(0))
-    positions = pos_emb.augment_positions(positions)
+    positions = (torch.full((batch_size, 1), positions_delta) *
+                 torch.arange(n_tokens).unsqueeze(0))
+    #positions = pos_emb.augment_positions(positions)
+    positions -= torch.nanmean(positions, axis=1, keepdim=True)
 
     assert positions.mean() == 0.0, f"""Error! After normalization expected mean = {0.0}
                                         | Received mean = {positions.mean()}"""
@@ -78,12 +77,13 @@ def test_augment_positions():
     def check_position_order(max_local_shift, batch_size=128, n_tokens=200, expect_disorder=False):
         if expect_disorder:
             spotted_disorder = False
-        pos_scale, freq_scale = 1.0, 1.0
+        positions_delta, freq_scale = 1.0, 1.0
         pos_emb = CAPE1d(d_model=512, max_global_shift=0.0, max_local_shift=max_local_shift,
-                         max_global_scaling=1.0, normalize=True, pos_scale=pos_scale,
+                         max_global_scaling=1.0, normalize=True,
                          freq_scale=freq_scale, batch_first=False)
 
-        positions = (torch.full((batch_size, 1), pos_scale) * torch.arange(n_tokens).unsqueeze(0))
+        positions = (torch.full((batch_size, 1), positions_delta) *
+                     torch.arange(n_tokens).unsqueeze(0))
         positions = pos_emb.augment_positions(positions)
         for b in range(batch_size):
             pos = positions[b, :]

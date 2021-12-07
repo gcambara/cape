@@ -46,13 +46,11 @@ pos_emb = CAPE1d(d_model=512, max_global_shift=5.0,
 # Max global shift is 60 s.
 # Max local shift is set to 1.0 to maintain positional order.
 # Max global scaling is 1.1, according to WSJ recipe.
-# Pos scale is 0.03 since feats are strided between each other in 0.03 s.
 # Freq scale is 30 to ensure that 30 ms queries are possible with long audios
 from cape import CAPE1d
 pos_emb = CAPE1d(d_model=512, max_global_shift=60.0, 
                  max_local_shift=0.5, max_global_scaling=1.1, 
-                 normalize=True, pos_scale=0.03,
-                 freq_scale=30.0)
+                 normalize=True, freq_scale=30.0)
 ```
 
 ### CAPE for ViT 🖼️
@@ -75,4 +73,4 @@ url={https://openreview.net/forum?id=n-FqqWXnWW}
 ```
 
 ## Acknowledgments 🙏
-Many thanks to Tatiana Likhomanenko for code reviewing and clarifying doubts about the paper and the implementation. :)
+Many thanks to the paper's authors for code reviewing and clarifying doubts about the paper and the implementation. :)
