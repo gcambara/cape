@@ -132,8 +132,8 @@ tensor([[0.0000, 0.0300, 0.0600,  ..., 2.9100, 2.9400, 2.9700],
 ```
 
 ### CAPE for ViT 🖼️
-```CAPE2d``` is used for embedding positions in image patches.
-Both square and non-square patches are supported.
+```CAPE2d``` is used for embedding positions in image patches. Scaling of positions between [-1, 1] is done within the module, whether patches are square or non-square. Thus, set ```max_local_shift``` between 0 and 0.5, and the scale of local shifts will be adjusted according to the height and width of patches. Beyond values of 0.5 the order of positions might be altered, do this at your own risk!
+
 ```python
 from cape import CAPE2d
 pos_emb = CAPE2d(d_model=512, max_global_shift=0.5, 
