@@ -114,15 +114,15 @@ increases for each time step.
 ```python
 from einops import repeat
 positions_delta = 0.03
-positions_delta = torch.ones(32)*0.03
+positions_delta = torch.ones(32)*positions_delta
 positions_delta[16:] = 0.05
 positions_delta = repeat(positions_delta, 'b -> b new_axis', new_axis=100)
-positions_delta[0, :] *= torch.arange(100)
+positions_delta[0, :] *= torch.arange(1, 101)
 x = pos_emb(x, positions_delta=positions_delta)
 ```
 ```python
 positions_delta
-tensor([[0.0000, 0.0300, 0.0600,  ..., 2.9100, 2.9400, 2.9700],
+tensor([[0.0300, 0.0600, 0.0900,  ..., 2.9400, 2.9700, 3.0000],
         [0.0300, 0.0300, 0.0300,  ..., 0.0300, 0.0300, 0.0300],
         [0.0300, 0.0300, 0.0300,  ..., 0.0300, 0.0300, 0.0300],
         ...,
