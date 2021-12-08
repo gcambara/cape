@@ -60,14 +60,9 @@ def test_cape1d():
 def test_augment_positions():
     print("Checking correct normalization of positions...")
     batch_size, n_tokens = 128, 200
-    positions_delta, freq_scale = 1.0, 1.0
-    pos_emb = CAPE1d(d_model=512, max_global_shift=0.0, max_local_shift=0.0,
-                     max_global_scaling=1.0, normalize=True,
-                     freq_scale=freq_scale, batch_first=False)
-
+    positions_delta = 1.0
     positions = (torch.full((batch_size, 1), positions_delta) *
                  torch.arange(n_tokens).unsqueeze(0))
-    #positions = pos_emb.augment_positions(positions)
     positions -= torch.nanmean(positions, axis=1, keepdim=True)
 
     assert positions.mean() == 0.0, f"""Error! After normalization expected mean = {0.0}

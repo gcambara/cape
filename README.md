@@ -51,13 +51,12 @@ x = pos_emb(x)
 # Case 2: padding, e.g. although seq_len is 10,
 # the original length of samples is 7, and they
 # have been padded until 10.
-# This can be specified in the forward method.
 x_lengths = torch.ones(32)*7
 x = pos_emb(x, x_lengths=x_lengths)
 ```
 
 ### CAPE for audio 🎙️
-```CAPE1d``` for audio is applied similarly to audio. 
+```CAPE1d``` for audio is applied similarly to text. 
 Use ```positions_delta``` argument to set the separation in seconds
 between time steps, and ```x_lengths``` for indicating sample 
 durations in case there is padding.
