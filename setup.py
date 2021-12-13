@@ -9,7 +9,7 @@ setup(
     author='Guillermo Cámbara',
     author_email='guillermocambara@gmail.com',
     url='https://github.com/gcambara/cape',
-    download_url='https://github.com/gcambara/cape/archive/v_100.tar.gz',
+    download_url='https://github.com/gcambara/cape/archive/refs/tags/v1.0.0.tar.gz',
     install_requires=[
         'einops>=0.3.2',
         'torch>=1.10.0',
